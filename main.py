@@ -105,6 +105,8 @@ async def on_message(ctx):
                               description="This is an embed that will show how to build an embed and the different components",
                               color=0xFF5733)
         await ctx.channel.send(embed=embed)
+
+
     else:
         return
 
