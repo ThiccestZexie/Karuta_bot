@@ -123,6 +123,7 @@ async def add(ctx):
         user = await bot.fetch_user(ctx.author.id)
         print(f" {user} has the id: {ctx.author.id}")
         await ctx.channel.send("You have been added to the list!")
+
 @bot.event
 async def send_dm(ctx, *, message):
     for user_id in user_ids:
