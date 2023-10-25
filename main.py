@@ -18,7 +18,9 @@ intents = discord.Intents.default()
 intents.members = True
 intents.message_content = True
 bot = commands.Bot(command_prefix='€', description=description, intents=intents)
-
+karuta_bot_id = 646937666251915264 
+karuta_bot_name = "Karuta"
+expected_channel_id  = 1154079321913307167 
 user_ids = []
 
 
@@ -31,10 +33,12 @@ async def on_ready():
 async def on_message(ctx):
     if ctx.author == bot.user:
         return
-    if ctx.embeds:
-        print("found embeds")
-        print(ctx.embeds)
-        print(ctx.embeds[0].to_dict()['description'])
+    if ctx.channel.id == expected_channel_id:
+        if ctx.embeds and (ctx.author.id == karuta_bot_id and ctx.author.name == karuta_bot_name or ctx.author.name == "Karuta#1280"):
+            print("found embeds")
+            print(ctx.embeds)
+            print(ctx.embeds[0].to_dict()['description'])
+        
 
 
 
