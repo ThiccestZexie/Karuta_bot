@@ -3,25 +3,21 @@
 import discord
 from discord.ext import commands
 from discord.ext.commands import Bot
-import random
 import os
-import requests
-import json
 from dotenv import load_dotenv
-
-description = '''An example bot to showcase the discord.ext.commands extension
-module.
-
-There are a number of utility commands being showcased here.'''
+import settings
+import re
 
 intents = discord.Intents.default()
 intents.members = True
 intents.message_content = True
-bot = commands.Bot(command_prefix='€', description=description, intents=intents)
-karuta_bot_id = 646937666251915264 
-karuta_bot_name = "Karuta"
-expected_channel_id  = 1154079321913307167 
-user_ids = []
+bot = commands.Bot(command_prefix='€', description=settings.description, intents=intents)
+
+template_pattern = r'.*Owned by <@\d+>\n\n\*\*`[a-z0-9]+`(?: · [★☆]{1,5}){2} · #[0-9]+ · ◈[0-9]+ · [\w: ]+ · \*\*[\w ]+\*\*b.*'
+
+settings = settings.Settings()
+
+
 
 
 @bot.event
@@ -33,15 +29,15 @@ async def on_ready():
 async def on_message(ctx):
     if ctx.author == bot.user:
         return
-    if ctx.channel.id == expected_channel_id:
-        if ctx.embeds and (ctx.author.id == karuta_bot_id and ctx.author.name == karuta_bot_name or ctx.author.name == "Karuta#1280"):
+    if ctx.channel.id == settings.expected_channel_id:
+        if ctx.embeds and (ctx.author.id == settings.karuta_bot_id and ctx.author.name == settings.karuta_bot_name or ctx.author.name == "Karuta#1280"):
             print("found embeds")
-            print(ctx.embeds)
-            print(ctx.embeds[0].to_dict()['description'])
-        
+            card_info = ctx.embeds[0].to_dict()['description']
 
-
-
+            card_print = re.search(r'#(\d+)', card_info).group(1)
+            editon = re.search(r'◈(\d+)', card_info).group(1)
+            owner_id = re.search(r'Owned by <@(\d+)>', card_info).group(1)
+            
 
 load_dotenv()
 bot.run(os.getenv("TOKEN"))
