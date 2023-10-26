@@ -13,7 +13,10 @@ intents.members = True
 intents.message_content = True
 bot = commands.Bot(command_prefix='€', description=settings.description, intents=intents)
 
-template_pattern = r'.*Owned by <@\d+>\n\n\*\*`[a-z0-9]+`(?: · [★☆]{1,5}){2} · #[0-9]+ · ◈[0-9]+ · [\w: ]+ · \*\*[\w ]+\*\*b.*'
+mid_print = []
+low_print = []
+high_print = []
+current_posting = []
 
 settings = settings.Settings()
 
@@ -37,7 +40,19 @@ async def on_message(ctx):
             card_print = re.search(r'#(\d+)', card_info).group(1)
             editon = re.search(r'◈(\d+)', card_info).group(1)
             owner_id = re.search(r'Owned by <@(\d+)>', card_info).group(1)
-            
+            card_info_lines = card_info.split('\n')
+            card_info_lines.pop(0)  # Remove the first line (Owned by)
+            post_info = ''.join(card_info_lines)  # Join the remaining lines back into a string
+            current_posting.append([post_info, owner_id])
+    if ctx.content.startswith("€yoi"):
+
+        market = discord.Embed(title="Market", color=0x00ff00, )
+        for current_post in current_posting:
+            user = await bot.fetch_user(current_post[1])
+            user_mention = discord.utils.escape_markdown(user.mention)
+            market.add_field(name="Card Info", value=(current_post[0] + " Owned by: " +  user_mention), inline=True)
+
+        await ctx.channel.send(embed=market)
 
 load_dotenv()
 bot.run(os.getenv("TOKEN"))
