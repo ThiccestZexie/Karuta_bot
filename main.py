@@ -17,7 +17,7 @@ mid_print = []
 low_print = []
 high_print = []
 current_posting = []
-
+template = r"^.*kv [A-Za-z0-9]{3,10} [0-9]{1,3}.*$"
 settings = settings.Settings()
 
 
@@ -32,6 +32,7 @@ async def on_ready():
 async def on_message(ctx):
     if ctx.author == bot.user:
         return
+        
     if ctx.channel.id == settings.expected_channel_id:
         if ctx.embeds and (ctx.author.id == settings.karuta_bot_id and ctx.author.name == settings.karuta_bot_name or ctx.author.name == "Karuta#1280"):
             print("found embeds")
@@ -39,20 +40,39 @@ async def on_message(ctx):
 
             card_print = re.search(r'#(\d+)', card_info).group(1)
             editon = re.search(r'◈(\d+)', card_info).group(1)
+
             owner_id = re.search(r'Owned by <@(\d+)>', card_info).group(1)
+
             card_info_lines = card_info.split('\n')
             card_info_lines.pop(0)  # Remove the first line (Owned by)
             post_info = ''.join(card_info_lines)  # Join the remaining lines back into a string
-            current_posting.append([post_info, owner_id])
-    if ctx.content.startswith("€yoi"):
+            ticket_price =  5
+            await get_price(ctx, owner_id)
 
+            print(ticket_price)
+            current_posting.append([post_info, owner_id])
+            
+    if ctx.content.startswith("€yoi"):
         market = discord.Embed(title="Market", color=0x00ff00, )
         for current_post in current_posting:
             user = await bot.fetch_user(current_post[1])
             user_mention = discord.utils.escape_markdown(user.mention)
-            market.add_field(name="Card Info", value=(current_post[0] + " Owned by: " +  user_mention), inline=True)
+            market.add_field(name="Card Info", value=(current_post[0] + " Owned by:  · " +  user_mention), inline=True)
 
         await ctx.channel.send(embed=market)
+        
 
-load_dotenv()
-bot.run(os.getenv("TOKEN"))
+@bot.command()
+async def get_price(ctx, ownder_id):
+    def check(message):
+        return message.author.id == ownder_id
+  
+    await ctx.channel.send("Please send me a message")
+    message = await bot.wait_for('message', check=check(ctx))
+
+    
+try:
+    load_dotenv()
+    bot.run(os.getenv("TOKEN"))
+except Exception as e:
+    print(f"An error occurred: {e}")
