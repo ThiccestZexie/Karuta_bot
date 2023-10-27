@@ -65,12 +65,11 @@ async def on_message(ctx):
 @bot.command()
 async def get_price(ctx, ownder_id):
     def check(message):
-        return message.author.id == ownder_id
+        return str(message.author.id) == str(ownder_id)
   
     await ctx.channel.send("Please send me a message")
-    message = await bot.wait_for('message', check=check(ctx))
-
-    
+    on_message = await bot.wait_for('message', check=check)
+    await ctx.channel.send("You sent me: {0.content}".format(on_message))           
 try:
     load_dotenv()
     bot.run(os.getenv("TOKEN"))
