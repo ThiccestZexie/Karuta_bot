@@ -46,18 +46,16 @@ async def on_message(ctx):
             card_info_lines = card_info.split('\n')
             card_info_lines.pop(0)  # Remove the first line (Owned by)
             post_info = ''.join(card_info_lines)  # Join the remaining lines back into a string
-            ticket_price =  5
-            await get_price(ctx, owner_id)
-
-            print(ticket_price)
-            current_posting.append([post_info, owner_id])
+            ticket_price =await get_price(ctx, owner_id)
+if ticket_price > 0
+          current_posting.append([post_info, owner_id, ticket_price])
             
     if ctx.content.startswith("€yoi"):
         market = discord.Embed(title="Market", color=0x00ff00, )
         for current_post in current_posting:
             user = await bot.fetch_user(current_post[1])
             user_mention = discord.utils.escape_markdown(user.mention)
-            market.add_field(name="Card Info", value=(current_post[0] + " Owned by:  · " +  user_mention), inline=True)
+            market.add_field(name="Card Info", value=("price: " + current_post[2] + current_post[0] + " Owned by:  · " +  user_mention), inline=True)
 
         await ctx.channel.send(embed=market)
         
@@ -69,7 +67,13 @@ async def get_price(ctx, ownder_id):
   
     await ctx.channel.send("Please send me a message")
     on_message = await bot.wait_for('message', check=check)
-    await ctx.channel.send("You sent me: {0.content}".format(on_message))           
+
+if re.match(r'^[0,9]{1,4},on_message):
+    await ctx.channel.send(f"price is set at  {on_message.content}")
+return int(on_message.content)
+else:   
+    await ctx.channel.send("incorrect input restart whole process")
+    
 try:
     load_dotenv()
     bot.run(os.getenv("TOKEN"))
