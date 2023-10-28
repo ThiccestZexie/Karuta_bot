@@ -3,24 +3,24 @@
 import discord
 from discord.ext import commands
 from discord.ext.commands import Bot
-import random
 import os
-import requests
-import json
 from dotenv import load_dotenv
-
-description = '''An example bot to showcase the discord.ext.commands extension
-module.
-
-There are a number of utility commands being showcased here.'''
+import settings
+import re
 
 intents = discord.Intents.default()
 intents.members = True
 intents.message_content = True
-path = "ids.txt"
-bot = commands.Bot(command_prefix='€', description=description, intents=intents)
+bot = commands.Bot(command_prefix='€', description=settings.description, intents=intents)
 
-user_ids = []
+mid_print = []
+low_print = []
+high_print = []
+current_posting = []
+template = r"^.*kv [A-Za-z0-9]{3,10} [0-9]{1,3}.*$"
+settings = settings.Settings()
+
+
 
 
 @bot.event
@@ -28,124 +28,54 @@ async def on_ready():
     print(f'Logged in as {bot.user} (ID: {bot.user.id})')
     print('------')
 
-    with open(path, 'r') as f:
-         for line in f:
-            user_ids.append(int(line))
-    for user_id in user_ids:
-        user = await bot.fetch_user(user_id)
-        print(f" {user} has the id: {user_id}")
-
-@bot.command()
-async def repeat(ctx, times: int, content='repeating...'):
-    """Repeats a message multiple times."""
-    for i in range(times):
-        await ctx.send(content)
-
-
 @bot.event
 async def on_message(ctx):
-    if "I'm dropping 3 cards since" in ctx.content:
-        print("Sending DM...")
-        channel = ctx.channel
-        await send_dm(ctx, message=f"A server drop is happening! In https://discord.com/channels/1145481891357675582/1146524168800698470")
-    if "€add" in ctx.content.lower():
-        print("Adding ID...")
-        if ctx.author.id in user_ids:
-            print("ID already in list!")
-            return
-        if ctx.author.id not in user_ids:
-            with open('ids.txt', 'a') as file:
-                file.write(str(ctx.author.id) + "\n")
-        user_ids.append(ctx.author.id)
-
-        user = await bot.fetch_user(ctx.author.id)
-        print(f" {user} has the id: {ctx.author.id}")
-        await ctx.channel.send("You have been added to the list!")
-    if "€remove" == ctx.content.lower():
-        print("Removing ID...")
-        user_ids.remove(ctx.author.id)
-        with open('ids.txt', 'r') as file:
-            lines = file.readlines()
-        new_file = []
-
-        for line in lines:
-            if line.strip("\n") != str(ctx.author.id):
-                new_file.append(line)
-
-        with open('ids.txt', 'w') as file:
-            file.writelines(new_file)
-
-        for user_id in user_ids:
-            user = await bot.fetch_user(user_id)
-            print(f" {user} has the id: {user_id}")
-
-    if "€funny"  in ctx.content.lower():
-        f = r"https://official-joke-api.appspot.com/random_joke"
-        a = jokes(f)
-        print("Sending joke...")
-
-        await ctx.channel.send(a["setup"])
-        await ctx.channel.send(a["punchline"])
-
-
-    if "€check" in ctx.content.lower():
-        if ctx.author.id in user_ids:
-            await ctx.channel.send("You are in the list!")
-        else:
-            await ctx.channel.send("You are not in the list!")
-    if "€list" in ctx.content.lower():
-        for user_id in user_ids:
-            user = await bot.fetch_user(user_id)
-            print(f" {user} has the id: {user_id}")
-    if "x)" in ctx.content.lower():
-        user = await bot.fetch_user(ctx.author.id)
-        await ctx.channel.send("xD* " + user.mention)
-    if "€help" in ctx.content.lower():
-        embed = discord.Embed(title="Sample Embed", url="https://realdrewdata.medium.com/",
-                              description="This is an embed that will show how to build an embed and the different components",
-                              color=0xFF5733)
-        await ctx.channel.send(embed=embed)
-    else:
+    if ctx.author == bot.user:
         return
+        
+    if ctx.channel.id == settings.expected_channel_id:
+        if ctx.embeds and (ctx.author.id == settings.karuta_bot_id and ctx.author.name == settings.karuta_bot_name or ctx.author.name == "Karuta#1280"):
+            print("found embeds")
+            card_info = ctx.embeds[0].to_dict()['description']
 
-@bot.command("add", help="Adds your ID to the list of people to DM when a server drop happens")
-async def add(ctx): 
-    if "€add" in ctx.content.lower():
-        print("Adding ID...")
-        if ctx.author.id in user_ids:
-            print("ID already in list!")
-            return
-        if ctx.author.id not in user_ids:
-            with open('ids.txt', 'a') as file:
-                file.write(str(ctx.author.id) + "\n")
-        user_ids.append(ctx.author.id)
+            card_print = re.search(r'#(\d+)', card_info).group(1)
+            editon = re.search(r'◈(\d+)', card_info).group(1)
 
-        user = await bot.fetch_user(ctx.author.id)
-        print(f" {user} has the id: {ctx.author.id}")
-        await ctx.channel.send("You have been added to the list!")
+            owner_id = re.search(r'Owned by <@(\d+)>', card_info).group(1)
 
-@bot.event
-async def send_dm(ctx, *, message):
-    for user_id in user_ids:
-        user = bot.get_user(user_id)
-        try:
-            await user.send(message)
-            print(f'Sent DM to {user.name} ({user.id}): {message}')
-        except Exception as e:
-            print(f'Failed to send DM to {user.name} ({user.id}): {str(e)}')
+            card_info_lines = card_info.split('\n')
+            card_info_lines.pop(0)  # Remove the first line (Owned by)
+            post_info = ''.join(card_info_lines)  # Join the remaining lines back into a string
+            ticket_price =await get_price(ctx, owner_id)
+if ticket_price > 0
+          current_posting.append([post_info, owner_id, ticket_price])
+            
+    if ctx.content.startswith("€yoi"):
+        market = discord.Embed(title="Market", color=0x00ff00, )
+        for current_post in current_posting:
+            user = await bot.fetch_user(current_post[1])
+            user_mention = discord.utils.escape_markdown(user.mention)
+            market.add_field(name="Card Info", value=("price: " + current_post[2] + current_post[0] + " Owned by:  · " +  user_mention), inline=True)
 
+        await ctx.channel.send(embed=market)
+        
 
 @bot.command()
-async def shutdown(ctx):
-    print("yatta")
-    await ctx.bot.close()
+async def get_price(ctx, ownder_id):
+    def check(message):
+        return str(message.author.id) == str(ownder_id)
+  
+    await ctx.channel.send("Please send me a message")
+    on_message = await bot.wait_for('message', check=check)
 
-
-def jokes(f):
-    data = requests.get(f)
-    tt = json.loads(data.text)
-    return tt
-
-
-load_dotenv()
-bot.run(os.getenv("TOKEN"))
+if re.match(r'^[0,9]{1,4},on_message):
+    await ctx.channel.send(f"price is set at  {on_message.content}")
+return int(on_message.content)
+else:   
+    await ctx.channel.send("incorrect input restart whole process")
+    
+try:
+    load_dotenv()
+    bot.run(os.getenv("TOKEN"))
+except Exception as e:
+    print(f"An error occurred: {e}")
