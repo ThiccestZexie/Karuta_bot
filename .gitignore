@@ -1,6 +1,6 @@
-.txt
-.env
 *.txt
 *.env
 test.py
 *.json
+__pycache__
+.idea
