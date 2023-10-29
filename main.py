@@ -7,6 +7,7 @@ import os
 from dotenv import load_dotenv
 import settings
 import re
+import json
 
 intents = discord.Intents.default()
 intents.members = True
@@ -47,7 +48,7 @@ async def on_message(ctx):
             card_info_lines.pop(0)  # Remove the first line (Owned by)
             post_info = ''.join(card_info_lines)  # Join the remaining lines back into a string
             ticket_price =await get_price(ctx, owner_id)
-if ticket_price > 0
+    if ticket_price > 0:
           current_posting.append([post_info, owner_id, ticket_price])
             
     if ctx.content.startswith("€yoi"):
@@ -59,21 +60,31 @@ if ticket_price > 0
 
         await ctx.channel.send(embed=market)
         
-
+# Gets price by waiting for 
 @bot.command()
 async def get_price(ctx, ownder_id):
     def check(message):
-        return str(message.author.id) == str(ownder_id)
-  
+        # return true if message id matches owner id and is in same channel
+        return str(message.author.id) == str(ownder_id) and str(message.channel.id) == str(ctx.channel.id)
+    
     await ctx.channel.send("Please send me a message")
     on_message = await bot.wait_for('message', check=check)
 
-if re.match(r'^[0,9]{1,4},on_message):
-    await ctx.channel.send(f"price is set at  {on_message.content}")
-return int(on_message.content)
-else:   
-    await ctx.channel.send("incorrect input restart whole process")
+    if re.match(str(r'^[0,9]{1,4}'), str(on_message)):
+        await ctx.channel.send(f"price is set at  {on_message.content}")
+        return int(on_message.content)
+    else:   
+        await ctx.channel.send("incorrect input restart whole process")
+        return None
+
+async def save_market():
+    #uses the current_posting to iterate through all the nested lists and save them under catagories in a .txt file so they can be read on bot initialization later.
     
+
+    async def save_market():
+        with open('market.json', 'w') as f:
+            json.dump({'current_posting': current_posting}, f)
+
 try:
     load_dotenv()
     bot.run(os.getenv("TOKEN"))
