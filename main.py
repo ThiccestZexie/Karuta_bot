@@ -1,14 +1,15 @@
 # This example requires the 'members' and 'message_content' privileged intents to function.
 
+import json
+import os
+import re
+
 import discord
 from discord.ext import commands
 from discord.ext.commands import Bot
-import os
 from dotenv import load_dotenv
+
 import settings
-import re
-import json
-from json_handler import read_json_file, empty_json_file, fill_json_file;
 
 intents = discord.Intents.default()
 intents.members = True
@@ -87,6 +88,10 @@ async def set_market(ctx):
     if ctx.content.startswith("€set_market"):
         settings.expected_market_id = ctx.channel.id
         await ctx.channel.send("Market set")
+
+@bot.slash_command(name="first slash")
+async def first_slash(ctx): 
+    await ctx.respond("You executed the slash command!")
 
 def update_json():
     with open('market.json', 'w') as f:
