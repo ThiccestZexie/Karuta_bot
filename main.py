@@ -48,7 +48,8 @@ async def on_message(ctx):
             card_info_lines.pop(0)  # Remove the first line (Owned by)
             post_info = ''.join(card_info_lines)  # Join the remaining lines back into a string
             ticket_price =await get_price(ctx, owner_id)
-    if ticket_price > 0:
+
+    if ticket_price > 0 and ticket_price != None:
           current_posting.append([post_info, owner_id, ticket_price])
             
     if ctx.content.startswith("€yoi"):
@@ -75,16 +76,7 @@ async def get_price(ctx, ownder_id):
         return int(on_message.content)
     else:   
         await ctx.channel.send("incorrect input restart whole process")
-        return None
-
-async def save_market():
-    #uses the current_posting to iterate through all the nested lists and save them under catagories in a .txt file so they can be read on bot initialization later.
-    
-
-    async def save_market():
-        with open('market.json', 'w') as f:
-            json.dump({'current_posting': current_posting}, f)
-
+        raise Exception("incorrect input")
 try:
     load_dotenv()
     bot.run(os.getenv("TOKEN"))

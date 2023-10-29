@@ -3,3 +3,4 @@
 *.txt
 *.env
 test.py
+*.json
