@@ -51,7 +51,8 @@ async def on_message(ctx):
 
     if ticket_price > 0 and ticket_price != None:
           current_posting.append([post_info, owner_id, ticket_price])
-            
+          #update posted json. 
+
     if ctx.content.startswith("€yoi"):
         market = discord.Embed(title="Market", color=0x00ff00, )
         for current_post in current_posting:
@@ -77,6 +78,18 @@ async def get_price(ctx, ownder_id):
     else:   
         await ctx.channel.send("incorrect input restart whole process")
         raise Exception("incorrect input")
+    
+def update_json():
+    with open('market.json', 'w') as f:
+        json.dump({'current_posting': current_posting}, f)
+def read_json():
+    with open('market.json', 'r') as f:
+        data = json.load(f)
+        return data['current_posting']
+def empty_json():
+    with open('market.json', 'w') as f:
+        json.dump({'current_posting': []}, f)
+
 try:
     load_dotenv()
     bot.run(os.getenv("TOKEN"))
