@@ -15,5 +15,5 @@ class Settings:
         self.karuta_bot_id = 646937666251915264 # Change if needed
         self.karuta_bot_name = "Karuta" # Change if needed 
         self.expected_channel_id  = 1154079321913307167 # Change if needed
-
+        self.expected_market_id = 0 # Change if needed
    

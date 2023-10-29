@@ -8,11 +8,13 @@ from dotenv import load_dotenv
 import settings
 import re
 import json
+from json_handler import read_json_file, empty_json_file, fill_json_file;
 
 intents = discord.Intents.default()
 intents.members = True
 intents.message_content = True
 bot = commands.Bot(command_prefix='€', description=settings.description, intents=intents)
+
 
 mid_print = []
 low_print = []
@@ -28,6 +30,7 @@ settings = settings.Settings()
 async def on_ready():
     print(f'Logged in as {bot.user} (ID: {bot.user.id})')
     print('------')
+    current_posting = read_json()
 
 @bot.event
 async def on_message(ctx):
@@ -50,8 +53,8 @@ async def on_message(ctx):
             ticket_price =await get_price(ctx, owner_id)
 
     if ticket_price > 0 and ticket_price != None:
-          current_posting.append([post_info, owner_id, ticket_price])
-          #update posted json. 
+        current_posting.append([post_info, owner_id, ticket_price])
+        update_json()
 
     if ctx.content.startswith("€yoi"):
         market = discord.Embed(title="Market", color=0x00ff00, )
@@ -63,7 +66,6 @@ async def on_message(ctx):
         await ctx.channel.send(embed=market)
         
 # Gets price by waiting for 
-@bot.command()
 async def get_price(ctx, ownder_id):
     def check(message):
         # return true if message id matches owner id and is in same channel
@@ -79,6 +81,13 @@ async def get_price(ctx, ownder_id):
         await ctx.channel.send("incorrect input restart whole process")
         raise Exception("incorrect input")
     
+
+@bot.event
+async def set_market(ctx):
+    if ctx.content.startswith("€set_market"):
+        settings.expected_market_id = ctx.channel.id
+        await ctx.channel.send("Market set")
+
 def update_json():
     with open('market.json', 'w') as f:
         json.dump({'current_posting': current_posting}, f)
