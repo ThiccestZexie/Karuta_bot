@@ -13,11 +13,13 @@ class Settings:
         self.expected_channel_id  = 1154079321913307167 # Change if needed
         self.expected_market_id = 0 # Change if needed
         self.current_posting = list()
-
+        self.market_channel_id = 1168671255604506745
 
     def get_current_posting(self):
         return self.current_posting
-
+    def get_market_channel_id(self):
+        return self.market_channel_id
+    
     def add_to_current_posting(self, post_info, owner_id, ticket_price):
         self.current_posting.append([post_info, owner_id, ticket_price])
         self.save_posting()

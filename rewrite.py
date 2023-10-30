@@ -53,12 +53,7 @@ async def on_message(ctx):
         
 
     if ctx.content.startswith("€yoi"):
-        market = discord.Embed(title="Market", color=0x00ff00, )
-        for current_post in settings.current_posting:
-            user = await bot.fetch_user(current_post[1])
-            user_mention = discord.utils.escape_markdown(user.mention)
-            market.add_field(name="Card Info", value=(current_post[0] + " Owned by:  · " +  user_mention), inline=True)
-
+        market = await create_market(ctx)
         await ctx.channel.send(embed=market)
         
 # Gets price by waiting for user input
@@ -76,14 +71,25 @@ async def get_price(ctx, ownder_id):
     else:   
         await ctx.channel.send("incorrect input restart whole process")
         raise Exception("incorrect input")
-
-
+@bot.slash_command(guild_ids=[1145481891357675582])
+async def post_market(ctx):
+    channel_id = settings.get_market_channel_id()  # replace with your channel id
+    channel = bot.get_channel(int(channel_id))
+    market = await create_market(ctx)
+    await channel.send(embed=market)
+    pass
 
 @bot.slash_command(guild_ids=[1145481891357675582])
 async def hello(ctx):
     await ctx.respond("Hello!")
 
-
+async def create_market(ctx): 
+    market = discord.Embed(title="Market", color=0x00ff00, )
+    for current_post in settings.current_posting:
+        user = await bot.fetch_user(current_post[1])
+        user_mention = discord.utils.escape_markdown(user.mention)
+        market.add_field(name="Card Info", value=(current_post[0] + " Owned by:  · " +  user_mention), inline=True)
+    return market
 
 try:
     load_dotenv()
