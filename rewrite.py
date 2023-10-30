@@ -28,7 +28,7 @@ async def on_ready():
     print(f"We have logged in as {bot.user}")
     settings.load_posting()
 @bot.event
-async def on_message(ctx):
+async def on_message(ctx : discord.context):
     if ctx.author == bot.user:
         return
         
@@ -57,7 +57,7 @@ async def on_message(ctx):
         await ctx.channel.send(embed=market)
         
 # Gets price by waiting for user input
-async def get_price(ctx, ownder_id):
+async def get_price(ctx : discord.context, ownder_id) -> int:
     def check(message):
         # return true if message id matches owner id and is in same channel
         return str(message.author.id) == str(ownder_id) and str(message.channel.id) == str(ctx.channel.id)
@@ -83,7 +83,7 @@ async def post_market(ctx):
 async def hello(ctx):
     await ctx.respond("Hello!")
 
-async def create_market(ctx): 
+async def create_market(ctx : discord.context) -> discord.Embed: 
     market = discord.Embed(title="Market", color=0x00ff00, )
     for current_post in settings.current_posting:
         user = await bot.fetch_user(current_post[1])
