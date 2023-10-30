@@ -26,7 +26,7 @@ settings = settings.Settings()
 @bot.event
 async def on_ready():
     print(f"We have logged in as {bot.user}")
-
+    settings.load_posting()
 @bot.event
 async def on_message(ctx):
     if ctx.author == bot.user:
@@ -49,6 +49,8 @@ async def on_message(ctx):
 
             if ticket_price > 0 and ticket_price != None:
                 settings.add_to_current_posting(post_info, owner_id, ticket_price)
+
+        
 
     if ctx.content.startswith("€yoi"):
         market = discord.Embed(title="Market", color=0x00ff00, )
