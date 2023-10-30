@@ -1,25 +1,31 @@
 import os
 import re
+import json
 
 import discord
 from dotenv import load_dotenv
 
 import settings
+intents = discord.Intents.all()
 
-bot = discord.Bot()
+intents.message_content = True
+intents.presences = True
+intents.members = True
+intents.guilds = True
+intents.emojis = True
+intents.bans = True
+intents.invites = True
+intents.voice_states = True
+intents.integrations = True
+intents.webhooks = True
+bot = discord.Bot(intents=intents)
 
-mid_print = []
-low_print = []
-high_print = []
-current_posting = []
-template = r"^.*kv [A-Za-z0-9]{3,10} [0-9]{1,3}.*$"
 settings = settings.Settings()
 
 
 @bot.event
 async def on_ready():
     print(f"We have logged in as {bot.user}")
-    
 
 @bot.event
 async def on_message(ctx):
@@ -41,17 +47,15 @@ async def on_message(ctx):
             post_info = ''.join(card_info_lines)  # Join the remaining lines back into a string
             ticket_price =await get_price(ctx, owner_id)
 
-    if ticket_price > 0 and ticket_price != None:
-        current_posting.append([post_info, owner_id, ticket_price])
-        
-        #update json
+            if ticket_price > 0 and ticket_price != None:
+                settings.add_to_current_posting(post_info, owner_id, ticket_price)
 
     if ctx.content.startswith("€yoi"):
         market = discord.Embed(title="Market", color=0x00ff00, )
-        for current_post in current_posting:
+        for current_post in settings.current_posting:
             user = await bot.fetch_user(current_post[1])
             user_mention = discord.utils.escape_markdown(user.mention)
-            market.add_field(name="Card Info", value=("price: " + current_post[2] + current_post[0] + " Owned by:  · " +  user_mention), inline=True)
+            market.add_field(name="Card Info", value=(current_post[0] + " Owned by:  · " +  user_mention), inline=True)
 
         await ctx.channel.send(embed=market)
         
@@ -64,13 +68,12 @@ async def get_price(ctx, ownder_id):
     await ctx.channel.send("Please send me a message")
     on_message = await bot.wait_for('message', check=check)
 
-    if re.match(str(r'^[0,9]{1,4}'), str(on_message)):
+    if on_message.content.isdigit():
         await ctx.channel.send(f"price is set at  {on_message.content}")
         return int(on_message.content)
     else:   
         await ctx.channel.send("incorrect input restart whole process")
         raise Exception("incorrect input")
-
 
 
 
