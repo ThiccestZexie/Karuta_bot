@@ -1,13 +1,12 @@
 import os
 import re
-import json
 
 import discord
 from dotenv import load_dotenv
 
 import settings
-intents = discord.Intents.all()
 
+intents = discord.Intents.all()
 intents.message_content = True
 intents.presences = True
 intents.members = True
@@ -18,6 +17,7 @@ intents.invites = True
 intents.voice_states = True
 intents.integrations = True
 intents.webhooks = True
+
 bot = discord.Bot(intents=intents)
 
 settings = settings.Settings()
@@ -48,7 +48,7 @@ async def on_message(ctx : discord.context):
             ticket_price =await get_price(ctx, owner_id)
 
             if ticket_price > 0 and ticket_price != None:
-                settings.add_to_current_posting(post_info, owner_id, ticket_price)
+                 settings.add_to_current_posting(post_info, owner_id, ticket_price)
 
         
 
@@ -71,13 +71,14 @@ async def get_price(ctx : discord.context, ownder_id) -> int:
     else:   
         await ctx.channel.send("incorrect input restart whole process")
         raise Exception("incorrect input")
+    
 @bot.slash_command(guild_ids=[1145481891357675582])
-async def post_market(ctx):
+async def post_market(ctx, title : str):
     channel_id = settings.get_market_channel_id()  # replace with your channel id
     channel = bot.get_channel(int(channel_id))
-    market = await create_market(ctx)
-    await channel.send(embed=market)
-    pass
+    market = await create_post(ctx, title ,settings.current_posting)
+    await channel.send(market)
+    
 
 @bot.slash_command(guild_ids=[1145481891357675582])
 async def hello(ctx):
@@ -88,8 +89,21 @@ async def create_market(ctx : discord.context) -> discord.Embed:
     for current_post in settings.current_posting:
         user = await bot.fetch_user(current_post[1])
         user_mention = discord.utils.escape_markdown(user.mention)
-        market.add_field(name="Card Info", value=(current_post[0] + " Owned by:  · " +  user_mention), inline=True)
+        market.add_field(name="Card Info", value=(current_post[0] + " Owned by:  · " +  user_mention), inline=False)
     return market
+def extract_card_print(post : list):
+    card_print = re.search(r'#(\d+)', post[0]).group(1)
+    return int(card_print)
+
+async def create_post(ctx: discord.context, title: str, list_of_cards: list) -> str:
+    message = "### " + title + "\n"
+    list_of_cards = sorted(list_of_cards, key=extract_card_print)
+    for card in list_of_cards:
+        user = await bot.fetch_user(card[1])
+        user_mention = discord.utils.escape_markdown(user.mention)
+        message += card[0] + " Owned by:  · " +  user_mention + "\n"
+    return message
+
 
 try:
     load_dotenv()
