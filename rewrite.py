@@ -43,6 +43,7 @@ async def on_message(ctx):
 
     if ticket_price > 0 and ticket_price != None:
         current_posting.append([post_info, owner_id, ticket_price])
+        
         #update json
 
     if ctx.content.startswith("€yoi"):
