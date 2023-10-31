@@ -27,6 +27,7 @@ settings = settings.Settings()
 async def on_ready():
     print(f"We have logged in as {bot.user}")
     settings.load_posting()
+    
 @bot.event
 async def on_message(ctx : discord.context):
     if ctx.author == bot.user:

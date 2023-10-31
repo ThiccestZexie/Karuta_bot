@@ -39,6 +39,7 @@ class Settings:
 
     def save_posting(self):
         self.current_posting = sorted(self.current_posting, key=lambda x: extract_card_print(x), reverse=False)
+        self.sort_all_eds()
         data = {
             "ed_one_post": self.ed_one_post,
             "ed_two_post": self.ed_two_post,
@@ -57,9 +58,13 @@ class Settings:
                 self.current_posting = json.load(f)
         except FileNotFoundError:
             return []
-        
 
     def load_from_json(self, key):
         with open('current_market.json', 'r') as f:
             data = json.load(f)
         return data.get(key, [])
+    
+    def sort_all_eds(self):
+        ed_lists = ['ed_one_post', 'ed_two_post', 'ed_three_post', 'ed_four_post', 'ed_five_post', 'ed_six_post']
+        for ed_list in ed_lists:
+            setattr(self, ed_list, sorted(getattr(self, ed_list), key=lambda x: extract_card_print(x), reverse=False))
