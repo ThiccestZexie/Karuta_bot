@@ -115,7 +115,11 @@ async def create_market(ctx : discord.context) -> discord.Embed:
         market.add_field(name="Card Info", value=((f"{current_post[2]} :tickets: · {current_post[0]} Owned by: · <@{user.id}>\n")), inline=False)
     return market
 
-@bot.slash_command(guild_ids=[1145481891357675582])
+@bot.slash_command(guild_ids=[1145481891357675582],
+                   name= "Remove Card",
+                   description="Removes a listed card from the market",
+                   )
+
 async def remove_card(ctx, card_code : str):
     def extract_code(s):
         parts = s.split('·')
