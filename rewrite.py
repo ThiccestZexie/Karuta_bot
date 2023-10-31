@@ -26,7 +26,6 @@ settings = settings.Settings()
 @bot.event
 async def on_ready():
     print(f"We have logged in as {bot.user}")
-    settings.load_posting()
     
 @bot.event
 async def on_message(ctx : discord.context):
@@ -46,10 +45,9 @@ async def on_message(ctx : discord.context):
             card_info_lines = card_info.split('\n')
             card_info_lines.pop(0)  # Remove the first line (Owned by)
             post_info = ''.join(card_info_lines)  # Join the remaining lines back into a string
-            ticket_price =await get_price(ctx, owner_id)
+            ticket_price = await get_price(ctx, owner_id)
 
             if ticket_price > 0 and ticket_price != None:
-                settings.add_to_current_posting(post_info, owner_id, ticket_price)
                 if str(editon) == "1":
                     settings.ed_one_post.append([post_info, owner_id, ticket_price])
                 elif str(editon) == "2":
@@ -62,9 +60,8 @@ async def on_message(ctx : discord.context):
                     settings.ed_five_post.append([post_info, owner_id, ticket_price])
                 else:
                     settings.ed_six_post.append([post_info, owner_id, ticket_price])
-            settings.save_posting()
+                settings.save_posting()
         
-
     if ctx.content.startswith("€yoi"):
         market = await create_market(ctx)
         await ctx.channel.send(embed=market)
@@ -85,20 +82,13 @@ async def get_price(ctx : discord.context, ownder_id) -> int:
         await ctx.channel.send("incorrect input restart whole process")
         raise Exception("incorrect input")
     
+    
 @bot.slash_command(guild_ids=[1145481891357675582])
 async def post_market(ctx, title : str):
     channel_id = settings.get_market_channel_id()  # replace with your channel id
     channel = bot.get_channel(int(channel_id))
     market = await create_post(ctx, title ,settings.current_posting)
     await channel.send(market)
-    
-
-async def create_market(ctx : discord.context) -> discord.Embed: 
-    market = discord.Embed(title="Market", color=0x00ff00, )
-    for current_post in settings.current_posting:
-        user = await bot.fetch_user(current_post[1])
-        market.add_field(name="Card Info", value=((f"{current_post[0]} Owned by: · <@{user.id}>\n")), inline=False)
-    return market
 
 
 def extract_card_print(post : list):
@@ -106,15 +96,23 @@ def extract_card_print(post : list):
     return int(card_print)
 
 
+# Crates a string with post info
 async def create_post(ctx: discord.context, title: str, list_of_cards: list) -> str:
     message = "### " + title + "\n"
     list_of_cards = sorted(list_of_cards, key=extract_card_print)
     for card in list_of_cards:
         user = await bot.fetch_user(card[1])
         message += (f"{card[0]} Owned by: · <@{user.id}>\n")
-    
     return message
 
+
+#Creates a embed with post info
+async def create_market(ctx : discord.context) -> discord.Embed: 
+    market = discord.Embed(title="Market", color=0x00ff00, )
+    for current_post in settings.current_posting:
+        user = await bot.fetch_user(current_post[1])
+        market.add_field(name="Card Info", value=((f"{current_post[0]} Owned by: · <@{user.id}>\n")), inline=False)
+    return market
 
 try:
     load_dotenv()
