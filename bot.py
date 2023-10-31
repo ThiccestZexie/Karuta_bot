@@ -71,6 +71,7 @@ async def get_price(ctx : discord.context, ownder_id) -> int:
     def check(message):
         # return true if message id matches owner id and is in same channel
         return str(message.author.id) == str(ownder_id) and str(message.channel.id) == str(ctx.channel.id)
+    
     #TODO: add timeout and make it so you have to react to message. 
     await ctx.channel.send("Respond with a price: ")
     on_message = await bot.wait_for('message', check=check)
@@ -130,14 +131,16 @@ async def remove_card(ctx, card_code : str):
     
     # Removes a card from all lists
     ed_lists = ['ed_one_post', 'ed_two_post', 'ed_three_post', 'ed_four_post', 'ed_five_post', 'ed_six_post']
+    card_removed = False
     for ed_list in ed_lists:
         for card in getattr(settings, ed_list):
             if str(extract_code(card[0])) == str(card_code):
                 getattr(settings, ed_list).remove(card)    
                 await ctx.channel.send(f"removed {card_code} ")
                 settings.save_posting()
-
-
+                card_removed = True
+    if not card_removed:
+        await ctx.channel.send(f"card {card_code} not found")
 
 
 
