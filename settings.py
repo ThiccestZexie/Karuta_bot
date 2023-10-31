@@ -64,7 +64,6 @@ class Settings:
         with open('current_market.json', 'r') as f:
             data = json.load(f)
         return data.get(key, [])
-    
 
     def sort_all(self):
         for ed_list in ed_lists:
