@@ -115,6 +115,23 @@ async def create_market(ctx : discord.context) -> discord.Embed:
         market.add_field(name="Card Info", value=((f"{current_post[2]} :tickets: · {current_post[0]} Owned by: · <@{user.id}>\n")), inline=False)
     return market
 
+@bot.slash_command(guild_ids=[1145481891357675582])
+async def remove_card(ctx, card_code : str):
+    def extract_code(s):
+        parts = s.split('·')
+        code = parts[0].strip()
+        code = code.replace('`**', '')
+        code = code.replace('**`', '')
+        return code
+    # Removes a card from all lists
+    ed_lists = ['ed_one_post', 'ed_two_post', 'ed_three_post', 'ed_four_post', 'ed_five_post', 'ed_six_post']
+    for ed_list in ed_lists:
+        for card in getattr(settings, ed_list):
+            print(extract_code(card[0]))
+            if str(extract_code(card[0])) == str(card_code):
+                getattr(settings, ed_list).remove(card)    
+                await ctx.channel.send(f"removed {card_code} ")
+                settings.save_posting()
 try:
     load_dotenv()
     bot.run(os.getenv("TOKEN"))
