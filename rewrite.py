@@ -71,8 +71,8 @@ async def get_price(ctx : discord.context, ownder_id) -> int:
     def check(message):
         # return true if message id matches owner id and is in same channel
         return str(message.author.id) == str(ownder_id) and str(message.channel.id) == str(ctx.channel.id)
-    
-    await ctx.channel.send("Please send me a message")
+    #TODO: add timeout and make it so you have to react to message. 
+    await ctx.channel.send("Respond with a price: ")
     on_message = await bot.wait_for('message', check=check)
 
     if on_message.content.isdigit():
@@ -82,13 +82,15 @@ async def get_price(ctx : discord.context, ownder_id) -> int:
         await ctx.channel.send("incorrect input restart whole process")
         raise Exception("incorrect input")
     
-    
+
 @bot.slash_command(guild_ids=[1145481891357675582])
-async def post_market(ctx, title : str):
+async def post_market(ctx):
     channel_id = settings.get_market_channel_id()  # replace with your channel id
     channel = bot.get_channel(int(channel_id))
-    market = await create_post(ctx, title ,settings.current_posting)
-    await channel.send(market)
+    ed_lists = ['ed_one_post', 'ed_two_post', 'ed_three_post', 'ed_four_post', 'ed_five_post', 'ed_six_post']
+    for ed_posts in ed_lists:
+        market = await create_post(ctx, ed_posts, getattr(settings, ed_posts))
+        await channel.send(market)
 
 
 def extract_card_print(post : list):
@@ -99,10 +101,9 @@ def extract_card_print(post : list):
 # Crates a string with post info
 async def create_post(ctx: discord.context, title: str, list_of_cards: list) -> str:
     message = "### " + title + "\n"
-    list_of_cards = sorted(list_of_cards, key=extract_card_print)
     for card in list_of_cards:
         user = await bot.fetch_user(card[1])
-        message += (f"{card[0]} Owned by: · <@{user.id}>\n")
+        message += (f"{card[2]} :tickets: {card[0]} · Owned by: <@{user.id}>\n")
     return message
 
 
@@ -111,7 +112,7 @@ async def create_market(ctx : discord.context) -> discord.Embed:
     market = discord.Embed(title="Market", color=0x00ff00, )
     for current_post in settings.current_posting:
         user = await bot.fetch_user(current_post[1])
-        market.add_field(name="Card Info", value=((f"{current_post[0]} Owned by: · <@{user.id}>\n")), inline=False)
+        market.add_field(name="Card Info", value=((f"{current_post[2]} :tickets: · {current_post[0]} Owned by: · <@{user.id}>\n")), inline=False)
     return market
 
 try:
