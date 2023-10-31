@@ -39,8 +39,17 @@ class Settings:
 
     def save_posting(self):
         self.current_posting = sorted(self.current_posting, key=lambda x: extract_card_print(x), reverse=False)
+        data = {
+            "ed_one_post": self.ed_one_post,
+            "ed_two_post": self.ed_two_post,
+            "ed_three_post": self.ed_three_post,
+            "ed_four_post": self.ed_four_post,
+            "ed_five_post": self.ed_five_post,
+            "ed_six_post": self.ed_six_post,
+            "current_posting": self.current_posting
+        }
         with open('current_market.json', 'w') as f:
-            json.dump(self.get_current_posting(), f)
+            json.dump(data, f, indent=4)
 
     def load_posting(self):
         try:
@@ -48,3 +57,9 @@ class Settings:
                 self.current_posting = json.load(f)
         except FileNotFoundError:
             return []
+        
+
+    def load_from_json(self, key):
+        with open('current_market.json', 'r') as f:
+            data = json.load(f)
+        return data.get(key, [])

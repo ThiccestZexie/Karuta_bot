@@ -48,8 +48,20 @@ async def on_message(ctx : discord.context):
             ticket_price =await get_price(ctx, owner_id)
 
             if ticket_price > 0 and ticket_price != None:
-                 settings.add_to_current_posting(post_info, owner_id, ticket_price)
-
+                settings.add_to_current_posting(post_info, owner_id, ticket_price)
+                if str(editon) == "1":
+                    settings.ed_one_post.append([post_info, owner_id, ticket_price])
+                elif str(editon) == "2":
+                    settings.ed_two_post.append([post_info, owner_id, ticket_price])
+                elif str(editon) == "3":
+                    settings.ed_three_post.append([post_info, owner_id, ticket_price])
+                elif str(editon) == "4":
+                    settings.ed_four_post.append([post_info, owner_id, ticket_price])
+                elif str(editon) == "5":
+                    settings.ed_five_post.append([post_info, owner_id, ticket_price])
+                else:
+                    settings.ed_six_post.append([post_info, owner_id, ticket_price])
+            settings.save_posting()
         
 
     if ctx.content.startswith("€yoi"):
@@ -80,28 +92,26 @@ async def post_market(ctx, title : str):
     await channel.send(market)
     
 
-@bot.slash_command(guild_ids=[1145481891357675582])
-async def hello(ctx):
-    await ctx.respond("Hello!")
-
 async def create_market(ctx : discord.context) -> discord.Embed: 
     market = discord.Embed(title="Market", color=0x00ff00, )
     for current_post in settings.current_posting:
         user = await bot.fetch_user(current_post[1])
-        user_mention = discord.utils.escape_markdown(user.mention)
-        market.add_field(name="Card Info", value=(current_post[0] + " Owned by:  · " +  user_mention), inline=False)
+        market.add_field(name="Card Info", value=((f"{current_post[0]} Owned by: · <@{user.id}>\n")), inline=False)
     return market
+
+
 def extract_card_print(post : list):
     card_print = re.search(r'#(\d+)', post[0]).group(1)
     return int(card_print)
+
 
 async def create_post(ctx: discord.context, title: str, list_of_cards: list) -> str:
     message = "### " + title + "\n"
     list_of_cards = sorted(list_of_cards, key=extract_card_print)
     for card in list_of_cards:
         user = await bot.fetch_user(card[1])
-        user_mention = discord.utils.escape_markdown(user.mention)
-        message += card[0] + " Owned by:  · " +  user_mention + "\n"
+        message += (f"{card[0]} Owned by: · <@{user.id}>\n")
+    
     return message
 
 
