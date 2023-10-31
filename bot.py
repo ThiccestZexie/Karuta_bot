@@ -22,10 +22,14 @@ bot = discord.Bot(intents=intents)
 
 settings = settings.Settings()
 
+def extract_card_print(post : list):
+    card_print = re.search(r'#(\d+)', post[0]).group(1)
+    return int(card_print)
 
 @bot.event
 async def on_ready():
     print(f"We have logged in as {bot.user}")
+
     
 @bot.event
 async def on_message(ctx : discord.context):
@@ -94,9 +98,6 @@ async def post_market(ctx):
         await channel.send(market)
 
 
-def extract_card_print(post : list):
-    card_print = re.search(r'#(\d+)', post[0]).group(1)
-    return int(card_print)
 
 
 # Crates a string with post info
@@ -116,11 +117,17 @@ async def create_market(ctx : discord.context) -> discord.Embed:
         market.add_field(name="Card Info", value=((f"{current_post[2]} :tickets: · {current_post[0]} Owned by: · <@{user.id}>\n")), inline=False)
     return market
 
-@bot.slash_command(guild_ids=[1145481891357675582],
-                   name= "Remove Card",
-                   description="Removes a listed card from the market",
-                   )
 
+@bot.slash_command(guild_ids=[1145481891357675582], name= "set-market-channel",description="Sets the channel where the market will be posted")
+async def set_market_channel(ctx):
+    settings.market_channel_id = ctx.channel.id
+    await ctx.channel.send(f"market channel set to {settings.market_channel_id}")
+
+
+@bot.slash_command(guild_ids=[1145481891357675582],
+                   name= "remove-card",
+                   description="Removes a listed card from the market"
+                   )
 async def remove_card(ctx, card_code : str):
     def extract_code(s):
         parts = s.split('·')
