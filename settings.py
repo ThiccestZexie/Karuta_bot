@@ -13,6 +13,7 @@ ed_lists = ['ed_one_post', 'ed_two_post', 'ed_three_post', 'ed_four_post', 'ed_f
 
 class Settings:
     def __init__(self):
+        self.this_server_link = "https://discord.gg/WwCsaDfRSC"
         self.karuta_bot_id = 646937666251915264 # Change if needed
         self.karuta_bot_name = "Karuta" # Change if needed 
         self.expected_channel_id  = 1154079321913307167 # Change if needed
@@ -68,3 +69,6 @@ class Settings:
     def sort_all(self):
         for ed_list in ed_lists:
             setattr(self, ed_list, sorted(getattr(self, ed_list), key=lambda x: extract_card_print(x), reverse=False))
+
+    def get_ed_list(self, ed):
+        return getattr(self, ed)

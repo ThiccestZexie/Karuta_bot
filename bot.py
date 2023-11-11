@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 
 import settings
 
+
 intents = discord.Intents.all()
 intents.message_content = True
 intents.presences = True
@@ -21,6 +22,7 @@ intents.webhooks = True
 bot = discord.Bot(intents=intents)
 
 settings = settings.Settings()
+discordInviteFilter = re.compile("(...)?(?:https?://)?discord(?:(?:app)?\.com/invite|\.gg)/?[a-zA-Z0-9]+/?")
 
 def extract_card_print(post : list):
     card_print = re.search(r'#(\d+)', post[0]).group(1)
@@ -65,7 +67,12 @@ async def on_message(ctx : discord.context):
                 else:
                     settings.ed_six_post.append([post_info, owner_id, ticket_price])
                 settings.save_posting()
-        
+
+
+    if discordInviteFilter.match(ctx.content) and ctx.content != settings.this_server_link  and ctx.channel.id == settings.expected_channel_id:
+        await ctx.delete()
+        await ctx.channel.send('no invites NOPPERS')
+    
     if ctx.content.startswith("€yoi"):
         market = await create_market(ctx)
         await ctx.channel.send(embed=market)
@@ -157,3 +164,4 @@ if __name__ == "__main__":
         bot.run(os.getenv("TOKEN"))
     except Exception as e:
         print(f"An error occurred: {e}")
+
